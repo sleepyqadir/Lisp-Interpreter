@@ -101,6 +101,27 @@ export const rest = (list: List): List => {
 
 // basic arthematic operations
 
+type basicArithmeticOps = (a: Atom<number>, b: Atom<number>) => Atom<number>
+export interface FunMap {
+  [key: string]: basicArithmeticOps
+}
+
+// f.value contains the symbol
+function performBasicArithmeticOps(remaining: List, first: Atom<string>) {
+  const evaluated = remaining.items.map((value) => {
+    return Eval(value)
+  })
+  if (evaluated.length === 0)
+    throw Error('Not enough arguments to the operator ' + first.value)
+  let a = <Atom<number>>evaluated[0]
+
+  const fun = _basicArithmeticOps[first.value]
+  for (let i = 1; i < evaluated.length; i++) {
+    a = fun(a, <Atom<number>>evaluated[i])
+  }
+  return a
+}
+
 const _add = (a: Atom<number>, b: Atom<number>): Atom<number> => {
   return <Atom<number>>{ value: a.value + b.value }
 }
@@ -113,4 +134,24 @@ const _mul = (a: Atom<number>, b: Atom<number>): Atom<number> => {
 }
 const _div = (a: Atom<number>, b: Atom<number>): Atom<number> => {
   return <Atom<number>>{ value: a.value / b.value }
+}
+
+const _basicArithmeticOps: FunMap = {
+  '+': _add,
+  '-': _sub,
+  '*': _mul,
+  '/': _div,
+}
+
+export const Eval = (exp: AUT | List) => {
+  if (isAtom(exp)) {
+    return exp
+  } else if (isList(exp)) {
+    const start = <Atom<string>>first(exp)
+
+    if (start.value in _basicArithmeticOps) {
+      const remaining = rest(exp)
+      return performBasicArithmeticOps(remaining, start)
+    }
+  }
 }
