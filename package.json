@@ -1,0 +1,28 @@
+{
+  "name": "Lisp-Interpreter",
+  "version": "1.0.0",
+  "description": "An interpreter that can take a subset of Lisp code as input and run it in an interpreter, all in TypeScript.",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://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@github.com/sleepyqadir/Lisp-Interpreter.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sleepyqadir/Lisp-Interpreter/issues"
+  },
+  "homepage": "https://github.com/sleepyqadir/Lisp-Interpreter#readme",
+  "devDependencies": {
+    "@types/jest": "^27.4.1",
+    "jest": "^27.5.1",
+    "ts-jest": "^27.1.3"
+  },
+  "dependencies": {
+    "typescript": "^4.6.2"
+  }
+}
