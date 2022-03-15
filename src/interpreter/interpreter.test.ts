@@ -9,7 +9,7 @@ import {
   first,
   rest,
   Eval,
-  // Run,
+  Run,
 } from './interpreter'
 
 test('should return an array of chars, given a string', () => {
@@ -447,118 +447,118 @@ test('conditional logic, if then else', () => {
 // defn <name> <params> <body 1> <body 2> .. <body n>
 // evaluate all bodies, and return the result of the last one
 
-// test('main function definition', () => {
-//   const t = ParseList('(defn main () 0)');
-//   const actual = Eval(t);
-//   expect(actual.value).toBe(true);
-// });
+test('main function definition', () => {
+  const t = ParseList('(defn main () 0)')
+  const actual = Eval(t)
+  expect(actual.value).toBe(true)
+})
 
-// test('main function malformed definition 1', () => {
-//   const t = ParseList('(defn main ())');
-//   const actual = () => {
-//     Eval(t);
-//   };
-//   expect(actual).toThrowError(Error('Malformed function definition'));
-// });
+test('main function malformed definition 1', () => {
+  const t = ParseList('(defn main ())')
+  const actual = () => {
+    Eval(t)
+  }
+  expect(actual).toThrowError(Error('Malformed function definition'))
+})
 
-// test('main function malformed definition 2', () => {
-//   const t = ParseList('(defn main');
-//   const actual = () => {
-//     Eval(t);
-//   };
-//   expect(actual).toThrowError(Error('Malformed function definition'));
-// });
+test('main function malformed definition 2', () => {
+  const t = ParseList('(defn main')
+  const actual = () => {
+    Eval(t)
+  }
+  expect(actual).toThrowError(Error('Malformed function definition'))
+})
 
-// test('main function malformed definition 3', () => {
-//   const t = ParseList('(defn main)');
-//   const actual = () => {
-//     Eval(t);
-//   };
-//   expect(actual).toThrowError(Error('Malformed function definition'));
-// });
+test('main function malformed definition 3', () => {
+  const t = ParseList('(defn main)')
+  const actual = () => {
+    Eval(t)
+  }
+  expect(actual).toThrowError(Error('Malformed function definition'))
+})
 
-// test('main function malformed definition 4', () => {
-//   const t = ParseList('(defn main)');
-//   const actual = () => {
-//     Eval(t);
-//   };
-//   expect(actual).toThrowError(Error('Malformed function definition'));
-// });
+test('main function malformed definition 4', () => {
+  const t = ParseList('(defn main)')
+  const actual = () => {
+    Eval(t)
+  }
+  expect(actual).toThrowError(Error('Malformed function definition'))
+})
 
-// // Main function is special, so it should be
-// // executed by the runtime automatically
-// test('main function exec should succeed', () => {
-//   const t = ParseList('(defn main () 3)')
-//   const actual = Run(t)
-//   expect(actual.value).toBe(3)
-// })
+// Main function is special, so it should be
+// executed by the runtime automatically
+test('main function exec should succeed', () => {
+  const t = ParseList('(defn main () 3)')
+  const actual = Run(t)
+  expect(actual.value).toBe(3)
+})
 
-// test('main function exec should succeed', () => {
-//   const t = ParseList('(defn main () (+ 1 2))')
-//   const actual = Run(t)
-//   expect(actual.value).toBe(3)
-// })
+test('main function exec should succeed', () => {
+  const t = ParseList('(defn main () (+ 1 2))')
+  const actual = Run(t)
+  expect(actual.value).toBe(3)
+})
 
-// test('arbitrary function definition within main', () => {
-//   const t = ParseList(`
-// 		(defn main ()
-// 			(defn fn () 5)
-// 			(fn)
-// 		)
-// 	`)
-//   const actual = Run(t)
-//   expect(actual.value).toBe(5)
-// })
+test('arbitrary function definition within main', () => {
+  const t = ParseList(`
+		(defn main ()
+			(defn fn () 5)
+			(fn)
+		)
+	`)
+  const actual = Run(t)
+  expect(actual.value).toBe(5)
+})
 
-// test('arbitrary function with an argument', () => {
-//   const t = ParseList(`
-// 		(defn main ()
-// 			(defn fn (n) n)
-// 			(fn 4)
-// 		)
-// 	`)
-//   const actual = Run(t)
-//   expect(actual.value).toBe(4)
-// })
+test('arbitrary function with an argument', () => {
+  const t = ParseList(`
+		(defn main ()
+			(defn fn (n) n)
+			(fn 4)
+		)
+	`)
+  const actual = Run(t)
+  expect(actual.value).toBe(4)
+})
 
-// test('arbitrary function with an argument 2', () => {
-//   const t = ParseList(`
-// 	(defn main ()
-// 		(defn fn (n)
-// 			(if (> n 5) 'bigger 'smaller)
-// 		)
-// 		(fn 6)
-// 	)
-// `)
-//   const actual = Run(t)
-//   expect(actual.value).toBe("'bigger")
-// })
+test('arbitrary function with an argument 2', () => {
+  const t = ParseList(`
+	(defn main ()
+		(defn fn (n)
+			(if (> n 5) 'bigger 'smaller)
+		)
+		(fn 6)
+	)
+`)
+  const actual = Run(t)
+  expect(actual.value).toBe("'bigger")
+})
 
-// test('arbitrary function with an argument 2', () => {
-//   const t = ParseList(`
-// 	(defn main ()
-// 		(defn fn (n)
-// 			(if (> n 5) 'bigger 'smaller)
-// 		)
-// 		(fn (- 7 1))
-// 	)
-// `)
-//   const actual = Run(t)
-//   expect(actual.value).toBe("'bigger")
-// })
+test('arbitrary function with an argument 2', () => {
+  const t = ParseList(`
+	(defn main ()
+		(defn fn (n)
+			(if (> n 5) 'bigger 'smaller)
+		)
+		(fn (- 7 1))
+	)
+`)
+  const actual = Run(t)
+  expect(actual.value).toBe("'bigger")
+})
 
-// test('recursive function', () => {
-//   const t = ParseList(`
-// 		(defn main ()
-// 			(defn factorial (n)
-// 				(if (== n 0)
-// 					1
-// 					(* n (factorial (- n 1)))
-// 				)
-// 			)
-// 			(factorial 20)
-// 		)
-// 	`)
-//   const actual = Run(t)
-//   expect(actual.value).toBe(2432902008176640000)
-// })
+test('recursive function', () => {
+  const t = ParseList(`
+		(defn main ()
+			(defn factorial (n)
+				(if (== n 0)
+					1
+					(* n (factorial (- n 1)))
+				)
+			)
+			(factorial 20)
+		)
+	`)
+  const actual = Run(t)
+  expect(actual.value).toBe(2432902008176640000)
+})
