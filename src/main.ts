@@ -8,12 +8,20 @@ export interface Atom<T> {
 
 type AUT = Atom<number> | Atom<string> | Atom<boolean>
 
-// TODO: add support for other symbols
 export const ParseAtom = (str: String): AUT => {
   str = str.trim()
-  if (str === '') throw Error('Expected a valid String')
+  if (str === '') throw Error('Invalid symbol')
   const result = Number(str)
-  return isNaN(result) ? <AUT>{ value: str } : <AUT>{ value: result }
+  if (isNaN(result)) {
+    if (str === 'true') {
+      return <AUT>{ value: true }
+    } else if (str === 'false') {
+      return <AUT>{ value: false }
+    }
+    return <AUT>{ value: str }
+  } else {
+    return <AUT>{ value: result }
+  }
 }
 
 export interface List {
@@ -63,15 +71,15 @@ const ParseActualList = (
 }
 
 export const ParseList = (str: string): List => {
-  if (str.length === 0) throw Error('Expected a valid String')
-  if (str[0] !== listOpenDelimeter) throw Error('List should start with (')
+  if (str.length === 0) throw Error('Expected a valid string')
+  if (str[0] !== listOpenDelimeter) throw Error('Starting ( not found')
   if (str[str.length - 1] !== listCloseDelimeter)
     throw Error('List should end with )')
 
   const elements = ToChars(str)
 
   const [l, m] = ParseActualList(elements, 0)
-  return <List>{ items: [] }
+  return <List>l.items[0]
 }
 
 export const isAtom = (o: AUT | List): o is AUT => {
@@ -84,7 +92,7 @@ export const isList = (o: AUT | List): o is List => {
 
 // first value of the list must be an atom
 export const first = (list: List): AUT => {
-  if (list.items.length === 0) throw Error('list is empty')
+  if (list.items.length === 0) throw Error('List is empty')
   if (isAtom(list.items[0])) {
     return list.items[0]
   }
@@ -99,7 +107,7 @@ export const rest = (list: List): List => {
   return temp
 }
 
-// basic arthematic operations
+// --------------------------------------------- Arithematic Operators --------------------
 
 type basicArithmeticOps = (a: Atom<number>, b: Atom<number>) => Atom<number>
 export interface FunMap {
@@ -107,7 +115,7 @@ export interface FunMap {
 }
 
 // f.value contains the symbol
-function performBasicArithmeticOps(remaining: List, first: Atom<string>) {
+const performBasicArithmeticOps = (remaining: List, first: Atom<string>) => {
   const evaluated = remaining.items.map((value) => {
     return Eval(value)
   })
@@ -143,15 +151,85 @@ const _basicArithmeticOps: FunMap = {
   '/': _div,
 }
 
-export const Eval = (exp: AUT | List) => {
+// --------------------------------------------- Comparision Operators --------------------
+
+type basicComparisionOps = (a: AUT, b: AUT) => Atom<boolean>
+export interface FunMap2 {
+  [key: string]: basicComparisionOps
+}
+
+function performBasicComparisonOps(r: List, f: Atom<string>): Atom<boolean> {
+  const fun = _basicComparisionOps[f.value]
+  if (r.items.length != 2)
+    throw new Error('Comparison operation ' + f.value + ' needs 2 arguments')
+  const [a, b] = r.items
+  return fun(Eval(a), Eval(b))
+}
+
+const _equal = (a: AUT, b: AUT): Atom<boolean> => {
+  return <Atom<boolean>>{ value: a.value === b.value }
+}
+
+const _notEqual = (a: AUT, b: AUT): Atom<boolean> => {
+  return <Atom<boolean>>{ value: a.value != b.value }
+}
+
+const _gt = (a: AUT, b: AUT): Atom<boolean> => {
+  return <Atom<boolean>>{ value: a.value > b.value }
+}
+
+const _lt = (a: AUT, b: AUT): Atom<boolean> => {
+  return <Atom<boolean>>{ value: a.value < b.value }
+}
+
+const _and = (a: AUT, b: AUT): Atom<boolean> => {
+  return <Atom<boolean>>{ value: a.value && b.value }
+}
+
+const _or = (a: AUT, b: AUT): Atom<boolean> => {
+  return <Atom<boolean>>{ value: a.value || b.value }
+}
+
+const _basicComparisionOps: FunMap2 = {
+  '==': _equal,
+  '!=': _notEqual,
+  '>': _gt,
+  '<': _lt,
+  '&&': _and,
+  '||': _or,
+}
+
+// ---------------------------------------------------------------- Logical Comparison Operators --------------------
+
+const performLogicalComparisionOps = (
+  remaining: List,
+  first: Atom<string>,
+): AUT => {
+  const [test, ifTrue, ifFalse] = remaining.items
+  return Eval(test).value ? Eval(ifTrue) : Eval(ifFalse)
+}
+
+export const Eval = (exp: AUT | List): AUT => {
   if (isAtom(exp)) {
+    if (typeof exp.value === 'string') {
+      if (exp.value.startsWith("'")) return exp
+      // if (exp.value in ctx) {
+      //   // resolve symbol to a value
+      //   return <AUT>ctx[exp.value]
+      // }
+    }
     return exp
   } else if (isList(exp)) {
     const start = <Atom<string>>first(exp)
-
+    const remaining = rest(exp)
     if (start.value in _basicArithmeticOps) {
-      const remaining = rest(exp)
       return performBasicArithmeticOps(remaining, start)
+    } else if (start.value in _basicComparisionOps) {
+      return performBasicComparisonOps(remaining, start)
+    } else if (start.value === 'if') {
+      return performLogicalComparisionOps(remaining, start)
     }
+    return start
   }
+  throw Error('Unknown evaluation error ' + exp)
 }
